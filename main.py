@@ -8,8 +8,14 @@ app=FastAPI()
 #Fastapi will validate the post request based on the 
 #Type fields provided here
 my_posts=[{"title":"title of post 1","content":"content of post 1","id":1},
-          {"title":"title of post 2","conten":"content of post 2","id":2}]
-class Post(BaseModel):#pydantic model
+          {"title":"title of post 2","content":"content of post 2","id":2}]
+
+# def get_postid(id):
+#     for post in my_posts:
+#         if post['id']==id:
+#             return post
+
+class Post(BaseModel):#pydantic model for our API schema
     title : str
     content : str
     published : bool = True #if user/client doesn't provide published field data, there's a default
@@ -40,3 +46,17 @@ def create_posts(msg_body : Post): #Body is a FastAPI object
     post_dict['id']=randrange(0,1000000)#choose a large enough range for unique ID
     my_posts.append(post_dict)
     return {"data":post_dict}#return the newly created posts after storage
+
+#Fastapi parses path operations top down
+@app.get("/posts/latest")
+def get_latest():
+    return my_posts[-1]
+
+
+#retreive a single post
+@app.get("/posts/{id}")#id path param
+def get_post(id:int):
+    # id=int(id)
+    for post in my_posts:
+        if post["id"]==id:
+            return {f"post with ID : {id}":post}
