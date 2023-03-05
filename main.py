@@ -10,10 +10,12 @@ app=FastAPI()
 my_posts=[{"title":"title of post 1","content":"content of post 1","id":1},
           {"title":"title of post 2","content":"content of post 2","id":2}]
 
-def get_postid(id):
+def get_postindex(id):
     for post in my_posts:
         if post['id']==id:
-            return post
+            return my_posts.index(post)
+        else:
+            return -1
 
 class Post(BaseModel):#pydantic model for our API schema
     title : str
@@ -84,5 +86,18 @@ def delete_post(id:int):
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"post with ID {id} not found")
     
+#update posts, using put, which means sending the whole schema again
+@app.put("/posts/{id}")
+def update_post(id:int,post:Post):
+    """
+    Get post index if in my_posts and replace element with post_dict
+    """
+    post_dict=post.dict()
+    ID=get_postindex(id)
+    if ID!=-1:
+        my_posts.pop(ID)
+        my_posts.insert(ID,post_dict)
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"post with ID {id} not found")
+    return {"message":"updated post"}
 
-    
