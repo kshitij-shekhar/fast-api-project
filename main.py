@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response, status, HTTPException
 from fastapi.params import Body
 from pydantic import BaseModel
 from typing import Optional
@@ -31,7 +31,7 @@ def root():
 def get_posts():
     return {"Data":my_posts}
 
-@app.post("/posts")
+@app.post("/posts",status_code=status.HTTP_201_CREATED)#successfully creating a resource should return 201
 def create_posts(msg_body : Post): #Body is a FastAPI object
     # retreives the body passed with the post request, converts it to a dictionary(data passed
     # as json) and stores it in the msg_body variable
@@ -55,8 +55,12 @@ def get_latest():
 
 #retreive a single post
 @app.get("/posts/{id}")#id path param
-def get_post(id:int):
+def get_post(id:int, response:Response):
     # id=int(id)
     for post in my_posts:
         if post["id"]==id:
             return {f"post with ID : {id}":post}
+    # response.status_code=404 #if post with given ID doesn't exist
+    # response.status_code=status.HTTP_404_NOT_FOUND
+    # return {"message":f"post with id {id} was not found!"}
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"post with id {id} was not found")
