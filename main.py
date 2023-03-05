@@ -10,10 +10,10 @@ app=FastAPI()
 my_posts=[{"title":"title of post 1","content":"content of post 1","id":1},
           {"title":"title of post 2","content":"content of post 2","id":2}]
 
-# def get_postid(id):
-#     for post in my_posts:
-#         if post['id']==id:
-#             return post
+def get_postid(id):
+    for post in my_posts:
+        if post['id']==id:
+            return post
 
 class Post(BaseModel):#pydantic model for our API schema
     title : str
@@ -64,3 +64,25 @@ def get_post(id:int, response:Response):
     # response.status_code=status.HTTP_404_NOT_FOUND
     # return {"message":f"post with id {id} was not found!"}
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"post with id {id} was not found")
+
+
+def delete_post_from_arr(id):
+    for post in my_posts:
+        if post['id']==id:
+            my_posts.pop(my_posts.index(post))
+            return 1 #id found
+        else:
+            return 0 #id not found
+
+
+@app.delete("/posts/{id}",status_code=status.HTTP_204_NO_CONTENT)
+def delete_post(id:int):
+    result=delete_post_from_arr(id)    
+    # return {"message":"successfully deleted post"}
+    if result:
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"post with ID {id} not found")
+    
+
+    
